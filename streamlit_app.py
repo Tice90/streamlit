@@ -81,83 +81,82 @@ Ams_gdf = geo_ams()
 # Bepaal het centrum van je kaart
 center = [52.0907, 5.1214]
 
-@st.cache_data
-def create_map():
-    # Maak een Folium kaartobject
-    m_gas = folium.Map(location=center, tiles='cartodb positron', zoom_start=7)
 
-    # Functie om popup toe te voegen aan een laag
-    def add_choropleth(geo_json_data, name, columns, fill_color, legend_name):
-        layer = folium.Choropleth(
-            geo_data=geo_json_data,
-            name=name,
-            data=CBS2021,
-            columns=columns,
-            key_on='properties.Codering_3',
-            fill_color=fill_color,
-            fill_opacity=0.7,
-            line_opacity=0.2,
-            legend_name=legend_name,
-            highlight=True,
-            overlay=True,
-            show=(name == 'Gemeenten')  # Alleen de 'Gemeenten' laag standaard tonen
-        )
+# Maak een Folium kaartobject
+m_gas = folium.Map(location=center, tiles='cartodb positron', zoom_start=7)
 
-        # Maak een pop-up voor de laag en voeg deze toe
-        popup = GeoJsonPopup(
-            fields=['statnaam', columns[1]],
-            aliases=['Locatie: ', 'Gem. Aardgasverbruik: '],
-            localize=True,
-            labels=True,
-            style="background-color: white;"
-        )
-        
-        # Voeg de pop-up toe aan de geojson laag van de Choropleth
-        layer.geojson.add_child(popup)
-        
-        # Voeg de Choropleth laag toe aan de kaart
-        layer.add_to(m_gas)
+# Functie om popup toe te voegen aan een laag
+def add_choropleth(geo_json_data, name, columns, fill_color, legend_name):
+    layer = folium.Choropleth(
+        geo_data=geo_json_data,
+        name=name,
+        data=CBS2021,
+        columns=columns,
+        key_on='properties.Codering_3',
+        fill_color=fill_color,
+        fill_opacity=0.7,
+        line_opacity=0.2,
+        legend_name=legend_name,
+        highlight=True,
+        overlay=True,
+        show=(name == 'Gemeenten')  # Alleen de 'Gemeenten' laag standaard tonen
+    )
 
-    # Voeg de GeoJSON van gemeenten toe aan de kaart met tooltips
-    add_choropleth(gemeente_geo_json, 'Gemeenten', ['Codering_3', 'GemiddeldAardgasverbruikTotaal_55'], 'YlOrRd', 'Gemiddeld Aardgasverbruik per Gemeente in 2021')
+    # Maak een pop-up voor de laag en voeg deze toe
+    popup = GeoJsonPopup(
+        fields=['statnaam', columns[1]],
+        aliases=['Locatie: ', 'Gem. Aardgasverbruik: '],
+        localize=True,
+        labels=True,
+        style="background-color: white;"
+    )
+    
+    # Voeg de pop-up toe aan de geojson laag van de Choropleth
+    layer.geojson.add_child(popup)
+    
+    # Voeg de Choropleth laag toe aan de kaart
+    layer.add_to(m_gas)
 
-    # Voeg de GeoJSON van wijken toe aan de kaart met tooltips
-    add_choropleth(wijk_geo_json, 'Wijken', ['Codering_3', 'GemiddeldAardgasverbruikTotaal_55'], 'BuGn', 'Gemiddeld Aardgasverbruik per Wijk in 2021')
+# Voeg de GeoJSON van gemeenten toe aan de kaart met tooltips
+add_choropleth(gemeente_geo_json, 'Gemeenten', ['Codering_3', 'GemiddeldAardgasverbruikTotaal_55'], 'YlOrRd', 'Gemiddeld Aardgasverbruik per Gemeente in 2021')
 
-    # Voeg de GeoJSON van buurten toe aan de kaart met tooltips
-    add_choropleth(buurt_geo_json, 'Buurten', ['Codering_3', 'GemiddeldAardgasverbruikTotaal_55'], 'YlGnBu', 'Gemiddeld Aardgasverbruik per Buurt in 2021')
+# Voeg de GeoJSON van wijken toe aan de kaart met tooltips
+add_choropleth(wijk_geo_json, 'Wijken', ['Codering_3', 'GemiddeldAardgasverbruikTotaal_55'], 'BuGn', 'Gemiddeld Aardgasverbruik per Wijk in 2021')
 
-
-    # Maak een FeatureGroup voor de markers
-    markers_layer = folium.FeatureGroup(name='Gasvrij', show=False)
+# Voeg de GeoJSON van buurten toe aan de kaart met tooltips
+add_choropleth(buurt_geo_json, 'Buurten', ['Codering_3', 'GemiddeldAardgasverbruikTotaal_55'], 'YlGnBu', 'Gemiddeld Aardgasverbruik per Buurt in 2021')
 
 
-    # Loop door de rijen in je GeoDataFrame
-    for idx, row in Ams_gdf.iterrows():
-        # Voeg een marker toe aan de markers_layer
-        folium.Marker(
-            location=[row['centroid_y'], row['centroid_x']],  # Gebruik de x- en y-coördinaten
-            tooltip=str(row['toelichting']),  # Zet de inhoud van 'Toelichting' om naar een string en gebruik als tooltip
-            popup=folium.Popup(str(row['toelichting']), max_width=450),  # Voeg eventueel een popup toe
-            show=False
-        ).add_to(markers_layer)
+# Maak een FeatureGroup voor de markers
+markers_layer = folium.FeatureGroup(name='Gasvrij', show=False)
 
-    # Voeg de markers_layer toe aan de kaart
-    markers_layer.add_to(m_gas)
 
-    # Volledig scherm
-    folium.plugins.Fullscreen(
-        position="topright",
-        title="Volledig scherm",
-        title_cancel="Sluiten",
-        force_separate_button=True,
-    ).add_to(m_gas)
+# Loop door de rijen in je GeoDataFrame
+for idx, row in Ams_gdf.iterrows():
+    # Voeg een marker toe aan de markers_layer
+    folium.Marker(
+        location=[row['centroid_y'], row['centroid_x']],  # Gebruik de x- en y-coördinaten
+        tooltip=str(row['toelichting']),  # Zet de inhoud van 'Toelichting' om naar een string en gebruik als tooltip
+        popup=folium.Popup(str(row['toelichting']), max_width=450),  # Voeg eventueel een popup toe
+        show=False
+    ).add_to(markers_layer)
 
-    # Voeg een laag controle toe om de choropleth aan of uit te zetten
-    folium.LayerControl().add_to(m_gas)
-    return m_gas
+# Voeg de markers_layer toe aan de kaart
+markers_layer.add_to(m_gas)
 
-m_gas = create_map()
+# Volledig scherm
+folium.plugins.Fullscreen(
+    position="topright",
+    title="Volledig scherm",
+    title_cancel="Sluiten",
+    force_separate_button=True,
+).add_to(m_gas)
+
+# Voeg een laag controle toe om de choropleth aan of uit te zetten
+folium.LayerControl().add_to(m_gas)
+
+
+
 
 
 # Toon de kaart
@@ -167,63 +166,61 @@ st_folium(m_gas, width=725, height=600)
 
 #Folium Map Elektriciteit
 
-@st.cache_data
-def create_map2():
-    # Maak een Folium kaartobject
-    m_ele = folium.Map(location=center, tiles='cartodb positron', zoom_start=7)
 
-    # Functie om popup toe te voegen aan een laag
-    def add_choropleth(geo_json_data, name, columns, fill_color, legend_name):
-        layer = folium.Choropleth(
-            geo_data=geo_json_data,
-            name=name,
-            data=CBS2021,
-            columns=columns,
-            key_on='properties.Codering_3',
-            fill_color=fill_color,
-            fill_opacity=0.7,
-            line_opacity=0.2,
-            legend_name=legend_name,
-            highlight=True,
-            overlay=True,
-            show=(name == 'Gemeenten')  # Alleen de 'Gemeenten' laag standaard tonen
-        )
+# Maak een Folium kaartobject
+m_ele = folium.Map(location=center, tiles='cartodb positron', zoom_start=7)
 
-        # Maak een pop-up voor de laag en voeg deze toe
-        popup = GeoJsonPopup(
-            fields=['statnaam', columns[1]],
-            aliases=['Locatie: ', 'Gem. Elektriciteitsverbruik: '],
-            localize=True,
-            labels=True,
-            style="background-color: white;"
-        )
-        
-        # Voeg de pop-up toe aan de geojson laag van de Choropleth
-        layer.geojson.add_child(popup)
-        
-        # Voeg de Choropleth laag toe aan de kaart
-        layer.add_to(m_ele)
+# Functie om popup toe te voegen aan een laag
+def add_choropleth(geo_json_data, name, columns, fill_color, legend_name):
+    layer = folium.Choropleth(
+        geo_data=geo_json_data,
+        name=name,
+        data=CBS2021,
+        columns=columns,
+        key_on='properties.Codering_3',
+        fill_color=fill_color,
+        fill_opacity=0.7,
+        line_opacity=0.2,
+        legend_name=legend_name,
+        highlight=True,
+        overlay=True,
+        show=(name == 'Gemeenten')  # Alleen de 'Gemeenten' laag standaard tonen
+    )
 
-    # Voeg de GeoJSON van gemeenten toe aan de kaart met tooltips
-    add_choropleth(gemeente_geo_json, 'Gemeenten', ['Codering_3', 'GemiddeldElektriciteitsverbruikTotaal_47'], 'YlOrRd', 'Gemiddeld Elektriciteitsverbruik per Gemeente in 2021')
+    # Maak een pop-up voor de laag en voeg deze toe
+    popup = GeoJsonPopup(
+        fields=['statnaam', columns[1]],
+        aliases=['Locatie: ', 'Gem. Elektriciteitsverbruik: '],
+        localize=True,
+        labels=True,
+        style="background-color: white;"
+    )
+    
+    # Voeg de pop-up toe aan de geojson laag van de Choropleth
+    layer.geojson.add_child(popup)
+    
+    # Voeg de Choropleth laag toe aan de kaart
+    layer.add_to(m_ele)
 
-    # Voeg de GeoJSON van wijken toe aan de kaart met tooltips
-    add_choropleth(wijk_geo_json, 'Wijken', ['Codering_3', 'GemiddeldElektriciteitsverbruikTotaal_47'], 'BuGn', 'Gemiddeld Elektriciteitsverbruik per Wijk in 2021')
+# Voeg de GeoJSON van gemeenten toe aan de kaart met tooltips
+add_choropleth(gemeente_geo_json, 'Gemeenten', ['Codering_3', 'GemiddeldElektriciteitsverbruikTotaal_47'], 'YlOrRd', 'Gemiddeld Elektriciteitsverbruik per Gemeente in 2021')
 
-    # Voeg de GeoJSON van buurten toe aan de kaart met tooltips
-    add_choropleth(buurt_geo_json, 'Buurten', ['Codering_3', 'GemiddeldElektriciteitsverbruikTotaal_47'], 'YlGnBu', 'Gemiddeld Elektriciteitsverbruik per Buurt in 2021')
+# Voeg de GeoJSON van wijken toe aan de kaart met tooltips
+add_choropleth(wijk_geo_json, 'Wijken', ['Codering_3', 'GemiddeldElektriciteitsverbruikTotaal_47'], 'BuGn', 'Gemiddeld Elektriciteitsverbruik per Wijk in 2021')
 
-    # Volledig scherm
-    folium.plugins.Fullscreen(
-        position="topright",
-        title="Volledig scherm",
-        title_cancel="Sluiten",
-        force_separate_button=True,
-    ).add_to(m_ele)
+# Voeg de GeoJSON van buurten toe aan de kaart met tooltips
+add_choropleth(buurt_geo_json, 'Buurten', ['Codering_3', 'GemiddeldElektriciteitsverbruikTotaal_47'], 'YlGnBu', 'Gemiddeld Elektriciteitsverbruik per Buurt in 2021')
 
-    # Voeg een laag controle toe om de choropleth aan of uit te zetten
-    folium.LayerControl().add_to(m_ele)
-    return m_ele
+# Volledig scherm
+folium.plugins.Fullscreen(
+    position="topright",
+    title="Volledig scherm",
+    title_cancel="Sluiten",
+    force_separate_button=True,
+).add_to(m_ele)
+
+# Voeg een laag controle toe om de choropleth aan of uit te zetten
+folium.LayerControl().add_to(m_ele)
 
 m_ele = create_map2()
 
