@@ -57,21 +57,17 @@ def geo_ams():
 
 CBS2021 = load_data()
 
-@st.cache_data
-def prepare_geojson(CBS2021):
-    # Filter en converteer het DataFrame voor elk regio type naar GeoJSON
-    gemeente_gdf = CBS2021[CBS2021['SoortRegio_2'] == 'Gemeente']
-    gemeente_geo_json = gemeente_gdf.to_json()
-    
-    wijk_gdf = CBS2021[CBS2021['SoortRegio_2'] == 'Wijk']
-    wijk_geo_json = wijk_gdf.to_json()
-    
-    buurt_gdf = CBS2021[CBS2021['SoortRegio_2'] == 'Buurt']
-    buurt_geo_json = buurt_gdf.to_json()
-    
-    return gemeente_geo_json, wijk_geo_json, buurt_geo_json
 
-gemeente_geo_json, wijk_geo_json, buurt_geo_json = prepare_geojson(CBS2021)
+# Filter en converteer het DataFrame voor elk regio type naar GeoJSON
+gemeente_gdf = CBS2021[CBS2021['SoortRegio_2'] == 'Gemeente']
+gemeente_geo_json = gemeente_gdf.to_json()
+
+wijk_gdf = CBS2021[CBS2021['SoortRegio_2'] == 'Wijk']
+wijk_geo_json = wijk_gdf.to_json()
+
+buurt_gdf = CBS2021[CBS2021['SoortRegio_2'] == 'Buurt']
+buurt_geo_json = buurt_gdf.to_json()
+
 Ams_gdf = geo_ams()
 
 #-----------------------------------------------------------------------------------#
