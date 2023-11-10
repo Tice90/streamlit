@@ -28,32 +28,6 @@ def load_data():
     
     return CBS2021
 
-@st.cache_data
-def geo_ams():
-    # De URL voor het GeoJSON endpoint
-    url = "https://api.data.amsterdam.nl/v1/aardgasvrijezones/buurt/?_format=geojson"
-
-    # Verstuur een GET-verzoek naar de URL
-    response = requests.get(url)
-
-    # Controleer of het verzoek succesvol was
-    if response.status_code == 200:
-        # Laad de GeoJSON data in een variabele
-        geojson_data = response.json()
-    else:
-        print(f"Fout bij het ophalen van de data: {response.status_code}")
-
-    Ams_gdf = gpd.GeoDataFrame.from_features(geojson_data['features'])
-
-    Ams_gdf['centroid'] = Ams_gdf['geometry'].centroid
-    Ams_gdf['centroid_x'] = Ams_gdf['centroid'].x
-    Ams_gdf['centroid_y'] = Ams_gdf['centroid'].y
-
-    # Filter de GeoDataFrame op de 'toelichting' kolom
-    Ams_gdf = Ams_gdf[Ams_gdf['toelichting'].str.contains('All electric:|Al \(bijna\) volledig op het warmtenet', na=False)]
-
-    return Ams_gdf
-
 
 CBS2021 = load_data()
 
@@ -78,6 +52,12 @@ wijk_geo_json = wijk_gdf.to_json()
 
 buurt_gdf = CBS2021[CBS2021['SoortRegio_2'] == 'Buurt']
 buurt_geo_json = buurt_gdf.to_json()
+
+Ams_gdf = gpd.GeoDataFrame.from_features(geojson_data['features'])
+Ams_gdf['centroid'] = Ams_gdf['geometry'].centroid
+Ams_gdf['centroid_x'] = Ams_gdf['centroid'].x
+Ams_gdf['centroid_y'] = Ams_gdf['centroid'].y
+Ams_gdf = Ams_gdf[Ams_gdf['toelichting'].str.contains('All electric:|Al \(bijna\) volledig op het warmtenet', na=False)]
 
 #-----------------------------------------------------------------------------------#
 
