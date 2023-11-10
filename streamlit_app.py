@@ -55,15 +55,6 @@ def geo_ams():
     return Ams_gdf
 
 
-
-@st.cache_data
-def get_geojson_data(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise Exception(f"Fout bij het ophalen van de data: {response.status_code}")
-
 CBS2021 = load_data()
 
 @st.cache_data
@@ -81,7 +72,6 @@ def prepare_geojson(CBS2021):
     return gemeente_geo_json, wijk_geo_json, buurt_geo_json
 
 gemeente_geo_json, wijk_geo_json, buurt_geo_json = prepare_geojson(CBS2021)
-geojson_data = get_geojson_data("https://api.data.amsterdam.nl/v1/aardgasvrijezones/buurt/?_format=geojson")
 Ams_gdf = geo_ams()
 
 #-----------------------------------------------------------------------------------#
