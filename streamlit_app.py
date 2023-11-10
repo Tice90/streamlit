@@ -58,6 +58,17 @@ def geo_ams():
 CBS2021 = load_data()
 
 
+@st.cache_data
+def get_geojson_data(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Fout bij het ophalen van de data: {response.status_code}")
+
+CBS2021, gemeente_data2021, buurten_data2021, amsterdam_data2021, amsterdam_e_mvr,amsterdam_e_mvr_1, amsterdam_g_mvr, amsterdam_g_mvr_1 = load_data()
+geojson_data = get_geojson_data("https://api.data.amsterdam.nl/v1/aardgasvrijezones/buurt/?_format=geojson")
+
 # Filter en converteer het DataFrame voor elk regio type naar GeoJSON
 gemeente_gdf = CBS2021[CBS2021['SoortRegio_2'] == 'Gemeente']
 gemeente_geo_json = gemeente_gdf.to_json()
@@ -67,8 +78,6 @@ wijk_geo_json = wijk_gdf.to_json()
 
 buurt_gdf = CBS2021[CBS2021['SoortRegio_2'] == 'Buurt']
 buurt_geo_json = buurt_gdf.to_json()
-
-Ams_gdf = geo_ams()
 
 #-----------------------------------------------------------------------------------#
 
