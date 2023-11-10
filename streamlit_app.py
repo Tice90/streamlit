@@ -16,7 +16,7 @@ def load_data():
     # gdf3 = gpd.read_file('cbsgebiedsindelingen2021.gpkg', layer='wijk_gegeneraliseerd_2021')
     # gdf = pd.concat([gdf, gdf2, gdf3], ignore_index=True)
     # gdf = gdf.to_crs(epsg=4326)
-    gdf = gpd.read_file('mijn_geodataframe.geojson')
+    gdf = gpd.read_file('geodata_cbs.geojson')
     gdf = gdf.to_crs(epsg=4326)
     CBS2021 = pd.DataFrame(cbsodata.get_data('85039NED'))
     CBS2021 = CBS2021[CBS2021['SoortRegio_2'] != 'Land']
